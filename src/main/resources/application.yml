@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: club
+  webflux:
+    base-path: /club
+  data:
+    mongodb:
+      host: mongo-club
+      port: 27017
+      username: root
+      password: ${DB_PASSWORD}
+      database: admin
+      authentication-database: admin
+
+server:
+  port: 8030
