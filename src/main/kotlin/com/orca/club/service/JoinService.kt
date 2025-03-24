@@ -32,8 +32,12 @@ class JoinService(
         }
     }
 
-    suspend fun getAllJoinApplications(clubId: String, status: JoinApplicationStatus): List<JoinApplication> {
+    suspend fun getClubApplications(clubId: String, status: JoinApplicationStatus): List<JoinApplication> {
         return joinReader.findAllByClubIdAndStatus(clubId, status)
+    }
+
+    suspend fun getPlayerApplications(playerId: String, status: JoinApplicationStatus): List<JoinApplication> {
+        return joinReader.findAllByPlayerIdAndStatus(playerId, status)
     }
 
     // TODO 수락 또는 거절 시 사용자에게 알림 전송

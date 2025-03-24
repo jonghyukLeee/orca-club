@@ -48,12 +48,22 @@ class ClubController(
     }
 
     @GetMapping("/{clubId}/join-application")
-    suspend fun getJoinApplications(
+    suspend fun getClubApplications(
         @PathVariable clubId: String,
         @RequestParam status: JoinApplicationStatus
     ): ResponseEntity<List<JoinApplication>> {
         return baseResponse(
-            body = joinService.getAllJoinApplications(clubId, status)
+            body = joinService.getClubApplications(clubId, status)
+        )
+    }
+
+    @GetMapping("/join-application")
+    suspend fun getPlayerApplications(
+        @RequestParam playerId: String,
+        @RequestParam status: JoinApplicationStatus
+    ): ResponseEntity<List<JoinApplicationResponse>> {
+        return baseResponse(
+            body = joinService.getPlayerApplications(playerId, status).map { JoinApplicationResponse(it) }
         )
     }
 

@@ -3,7 +3,7 @@ package com.orca.club.service
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
 import com.orca.club.repository.JoinApplicationRepository
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
@@ -21,5 +21,9 @@ class JoinReader(
 
     suspend fun findAllByClubIdAndStatus(clubId: String, status: JoinApplicationStatus): List<JoinApplication> {
         return repository.findAllByClubIdAndStatus(clubId, status).collectList().awaitSingle().toList()
+    }
+
+    suspend fun findAllByPlayerIdAndStatus(playerId: String, status: JoinApplicationStatus): List<JoinApplication> {
+        return repository.findAllByPlayerIdAndStatus(playerId, status).collectList().awaitSingle().toList()
     }
 }

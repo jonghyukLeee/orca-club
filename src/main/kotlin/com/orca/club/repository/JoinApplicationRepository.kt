@@ -9,4 +9,5 @@ import reactor.core.publisher.Mono
 interface JoinApplicationRepository: ReactiveMongoRepository<JoinApplication, String> {
     fun findByClubIdAndPlayerId(clubId: String, playerId: String): Mono<JoinApplication>
     fun findAllByClubIdAndStatus(clubId: String, status: JoinApplicationStatus): Flux<JoinApplication>
+    fun findAllByPlayerIdAndStatus(playerId: String, status: JoinApplicationStatus): Flux<JoinApplication>
 }
