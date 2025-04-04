@@ -1,20 +1,12 @@
 package com.orca.club.api
 
 import com.orca.club.domain.Club
-import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
 import com.orca.club.service.ClubService
 import com.orca.club.service.JoinService
 import com.orca.club.utils.baseResponse
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RequestMapping
 @RestController
@@ -27,6 +19,15 @@ class ClubController(
         val club = clubService.generate(request.name, request.introduction)
 
         return baseResponse(body = club)
+    }
+
+    @GetMapping("/{clubId}")
+    suspend fun get(@PathVariable clubId: String): ResponseEntity<ClubResponse> {
+        return baseResponse(
+            body = ClubResponse(
+                clubService.get(clubId)
+            )
+        )
     }
 
     @PatchMapping
@@ -42,7 +43,7 @@ class ClubController(
     ): ResponseEntity<JoinApplicationResponse> {
         return baseResponse(
             body = JoinApplicationResponse(
-                joinService.generate(request.clubId, request.playerId)
+                joinService.generate(request.clubId, request.playerId, request.position)
             )
         )
     }
@@ -51,9 +52,9 @@ class ClubController(
     suspend fun getClubApplications(
         @PathVariable clubId: String,
         @RequestParam status: JoinApplicationStatus
-    ): ResponseEntity<List<JoinApplication>> {
+    ): ResponseEntity<List<JoinApplicationResponse>> {
         return baseResponse(
-            body = joinService.getClubApplications(clubId, status)
+            body = joinService.getClubApplications(clubId, status).map { JoinApplicationResponse(it) }
         )
     }
 

@@ -1,28 +1,45 @@
 package com.orca.club.service
 
+import com.orca.club.domain.Club.Player.Position
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.exception.BaseException
+import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.JoinApplicationRepository
 import kotlinx.coroutines.reactor.awaitSingle
-import org.springframework.stereotype.Component
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.data.mongodb.core.FindAndModifyOptions
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.stereotype.Repository
 
-@Component
+@Repository
 class JoinManager(
-    private val repository: JoinApplicationRepository
+    private val repository: JoinApplicationRepository,
+    private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) {
-    suspend fun create(clubId: String, playerId: String): JoinApplication {
+    suspend fun create(clubId: String, playerId: String, position: Position): JoinApplication {
         return repository.save(
             JoinApplication(
                 clubId = clubId,
-                playerId = playerId
+                playerId = playerId,
+                position = position
             )
         ).awaitSingle()
     }
 
-    suspend fun updateStatus(origin: JoinApplication, status: JoinApplicationStatus): JoinApplication {
-        return repository.save(
-            origin.copy(status = status)
-        ).awaitSingle()
+    suspend fun updateStatus(joinApplicationId: String, status: JoinApplicationStatus): JoinApplication {
+        val query = Query(Criteria.where("_id").`is`(joinApplicationId))
+
+        val update = Update().apply {
+            set("status", status)
+        }
+
+        return reactiveMongoTemplate.findAndModify(
+            query, update, FindAndModifyOptions().returnNew(true), JoinApplication::class.java
+        ).awaitSingleOrNull() ?: throw BaseException(ErrorCode.JOIN_APPLICATION_NOT_FOUND)
     }
 
     suspend fun delete(entity: JoinApplication) {

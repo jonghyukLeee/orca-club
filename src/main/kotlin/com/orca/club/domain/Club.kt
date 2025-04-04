@@ -20,12 +20,18 @@ data class Club(
     data class Player(
         val id: String,
         val name: String,
-        val position: String,
-        val matchCount: Int,
-        val goal: Int,
-        val assist: Int,
-        val momCount: Int
-    )
+        val position: Position,
+        val matchCount: Int = 0,
+        val goal: Int = 0,
+        val assist: Int = 0,
+        val momCount: Int = 0
+    ) {
+        enum class Position {
+            FW,
+            MF,
+            DF
+        }
+    }
 
     data class Review(
         val id: String,

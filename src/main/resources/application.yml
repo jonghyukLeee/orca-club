@@ -11,6 +11,37 @@ spring:
       password: ${DB_PASSWORD}
       database: admin
       authentication-database: admin
-
+  kafka:
+    bootstrap-servers: orca-kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: >
+          club.join.accept:com.orca.club.external.kafka.JoinAcceptMessage,
+          club.join.accept.failed:com.orca.club.external.kafka.JoinAcceptMessage
+    consumer:
+      group-id: club
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.type.mapping: >
+          player.player.update:com.orca.club.external.kafka.PlayerUpdateMessage
+        spring.json.trusted.packages: "com.orca.*"
+    listener:
+      ack-mode: manual_immediate
 server:
   port: 8030
+
+external:
+  services:
+    auth:
+      host: orca-auth
+      port: 8010
+    player:
+      host: orca-player
+      port: 8020
+    match:
+      host: orca-match
+      port: 8040
