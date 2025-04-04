@@ -5,9 +5,9 @@ import com.orca.club.domain.JoinApplicationStatus
 import com.orca.club.repository.JoinApplicationRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 
-@Component
+@Repository
 class JoinReader(
     private val repository: JoinApplicationRepository
 ) {

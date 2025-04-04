@@ -3,9 +3,9 @@ package com.orca.club.service
 import com.orca.club.domain.Club
 import com.orca.club.repository.ClubRepository
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 
-@Component
+@Repository
 class ClubReader(
     private val clubRepository: ClubRepository
 ) {

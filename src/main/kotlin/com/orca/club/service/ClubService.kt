@@ -7,17 +7,23 @@ import org.springframework.stereotype.Service
 
 @Service
 class ClubService(
-    private val manager: ClubManager,
-    private val reader: ClubReader
+    private val clubManager: ClubManager,
+    private val clubReader: ClubReader
 ) {
     suspend fun generate(name: String, introduction: String): Club {
-        if (reader.byName(name) != null) throw BaseException(ErrorCode.DUPLICATE_NAME)
-        return manager.create(name, introduction)
+        if (clubReader.byName(name) != null) throw BaseException(ErrorCode.DUPLICATE_NAME)
+        return clubManager.create(name, introduction)
     }
 
-    suspend fun update(id: String, name: String, introduction: String): Club {
-        val club = reader.byId(id) ?: throw BaseException(ErrorCode.CLUB_NOT_FOUND)
+    suspend fun get(clubId: String): Club {
+        return clubReader.byId(clubId) ?: throw BaseException(ErrorCode.CLUB_NOT_FOUND)
+    }
 
-        return manager.update(club, name, introduction)
+    suspend fun update(id: String, name: String?, introduction: String?): Club {
+        return clubManager.update(
+            clubId = id
+            , name = name
+            , introduction = introduction
+        )
     }
 }
