@@ -1,6 +1,5 @@
 package com.orca.club.domain
 
-import com.orca.club.domain.Club.Player.Position
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -13,7 +12,7 @@ data class JoinApplication(
     val id: String? = null,
     val clubId: String,
     val playerId: String,
-    val position: Position,
+    val position: Player.Position,
     val status: JoinApplicationStatus = JoinApplicationStatus.PENDING,
     val createdAt: Instant = Instant.now()
 ) {

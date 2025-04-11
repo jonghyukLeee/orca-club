@@ -1,11 +1,6 @@
 package com.orca.club.api
 
-import com.orca.club.domain.Club
-import com.orca.club.domain.Club.Player
-import com.orca.club.domain.Club.Player.Position
-import com.orca.club.domain.Club.Review
-import com.orca.club.domain.JoinApplication
-import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.*
 
 data class GenerateRequest(
     val name: String,
@@ -24,30 +19,34 @@ data class ClubResponse(
     val introduction: String,
     val win: Int,
     val lose: Int,
-    val players: List<Player>,
-    val reviews: List<Review>,
+    val players: List<PlayerResponse>,
+    val reviews: List<ReviewResponse>,
     val mannerPoint: Double,
     val blacklist: List<String>,
     val status: String,
-) {
-    constructor(club: Club) : this(
-        id = club.id!!,
-        name = club.name,
-        introduction = club.introduction,
-        win = club.win,
-        lose = club.lose,
-        players = club.players.toList(),
-        reviews = club.reviews.toList(),
-        mannerPoint = club.mannerPoint,
-        blacklist = club.blacklist.toList(),
-        status = club.status.name,
-    )
-}
+)
+
+data class PlayerResponse(
+    val id: String,
+    val name: String,
+    val position: String,
+    val matchCount: Int,
+    val goal: Int,
+    val assist: Int,
+    val momCount: Int,
+    val status: String
+)
+
+data class ReviewResponse(
+    val id: String,
+    val point: Double,
+    val comment: String,
+)
 
 data class JoinRequest(
     val clubId: String,
     val playerId: String,
-    val position: Position
+    val position: Player.Position
 )
 
 data class JoinApplicationResponse(
@@ -58,14 +57,4 @@ data class JoinApplicationResponse(
     val status: JoinApplicationStatus,
     val notification: String,
     val createdAt: String
-) {
-    constructor(joinApplication: JoinApplication) : this(
-        requestId = joinApplication.id!!,
-        clubId = joinApplication.clubId,
-        playerId = joinApplication.playerId,
-        position = joinApplication.position.name,
-        status = joinApplication.status,
-        notification = joinApplication.status.notification,
-        createdAt = joinApplication.getCreateAtAsKST()
-    )
-}
+)

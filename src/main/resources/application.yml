@@ -2,7 +2,7 @@ spring:
   application:
     name: club
   webflux:
-    base-path: /club
+    base-path: /clubs
   data:
     mongodb:
       host: mongo-club

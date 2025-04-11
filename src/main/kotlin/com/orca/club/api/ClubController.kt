@@ -1,7 +1,7 @@
 package com.orca.club.api
 
-import com.orca.club.domain.Club
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.toResponse
 import com.orca.club.service.ClubService
 import com.orca.club.service.JoinService
 import com.orca.club.utils.baseResponse
@@ -15,26 +15,20 @@ class ClubController(
     private val joinService: JoinService
 ) {
     @PostMapping
-    suspend fun generate(@RequestBody request: GenerateRequest): ResponseEntity<Club> {
-        val club = clubService.generate(request.name, request.introduction)
-
-        return baseResponse(body = club)
+    suspend fun generate(@RequestBody request: GenerateRequest): ResponseEntity<ClubResponse> {
+        return baseResponse(body = clubService.generate(request.name, request.introduction).toResponse())
     }
 
     @GetMapping("/{clubId}")
     suspend fun get(@PathVariable clubId: String): ResponseEntity<ClubResponse> {
-        return baseResponse(
-            body = ClubResponse(
-                clubService.get(clubId)
-            )
-        )
+        return baseResponse(body = clubService.get(clubId).toResponse())
     }
 
     @PatchMapping
-    suspend fun update(@RequestBody request: UpdateRequest): ResponseEntity<Club> {
-        val club = clubService.update(request.id, request.name, request.introduction)
-
-        return baseResponse(body = club)
+    suspend fun update(@RequestBody request: UpdateRequest): ResponseEntity<ClubResponse> {
+        return baseResponse(
+            body = clubService.update(request.id, request.name, request.introduction).toResponse()
+        )
     }
 
     @PostMapping("/join-application")
@@ -42,9 +36,7 @@ class ClubController(
         @RequestBody request: JoinRequest
     ): ResponseEntity<JoinApplicationResponse> {
         return baseResponse(
-            body = JoinApplicationResponse(
-                joinService.generate(request.clubId, request.playerId, request.position)
-            )
+            body = joinService.generate(request.clubId, request.playerId, request.position).toResponse()
         )
     }
 
@@ -54,7 +46,7 @@ class ClubController(
         @RequestParam status: JoinApplicationStatus
     ): ResponseEntity<List<JoinApplicationResponse>> {
         return baseResponse(
-            body = joinService.getClubApplications(clubId, status).map { JoinApplicationResponse(it) }
+            body = joinService.getClubApplications(clubId, status).map { it.toResponse() }
         )
     }
 
@@ -64,7 +56,7 @@ class ClubController(
         @RequestParam status: JoinApplicationStatus
     ): ResponseEntity<List<JoinApplicationResponse>> {
         return baseResponse(
-            body = joinService.getPlayerApplications(playerId, status).map { JoinApplicationResponse(it) }
+            body = joinService.getPlayerApplications(playerId, status).map { it.toResponse() }
         )
     }
 
@@ -72,11 +64,7 @@ class ClubController(
     suspend fun joinAccept(
         @PathVariable id: String
     ): ResponseEntity<JoinApplicationResponse> {
-        return baseResponse(
-            body = JoinApplicationResponse(
-                joinService.accept(id)
-            )
-        )
+        return baseResponse(body = joinService.accept(id).toResponse())
     }
 
     @PostMapping("/join-application/{id}/reject")
@@ -84,5 +72,13 @@ class ClubController(
         @PathVariable id: String
     ): ResponseEntity<String> {
         return baseResponse(body = joinService.reject(id))
+    }
+
+    @GetMapping("/{clubId}/players/{playerId}")
+    suspend fun getPlayer(
+        @PathVariable clubId: String,
+        @PathVariable playerId: String
+    ): ResponseEntity<PlayerResponse> {
+        return baseResponse(body = clubService.getPlayer(clubId, playerId).toResponse())
     }
 }

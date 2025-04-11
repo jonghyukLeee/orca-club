@@ -1,8 +1,8 @@
 package com.orca.club.service
 
-import com.orca.club.domain.Club.Player.Position
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.external.kafka.publisher.CompensationEventPublisher
@@ -24,9 +24,9 @@ class JoinService(
     private val eventPublisher: EventPublisher,
     private val compensationEventPublisher: CompensationEventPublisher
 ) {
-    suspend fun generate(clubId: String, playerId: String, position: Position): JoinApplication {
+    suspend fun generate(clubId: String, playerId: String, position: Player.Position): JoinApplication {
         return coroutineScope {
-            launch { clubReader.byId(clubId) ?: BaseException(ErrorCode.CLUB_NOT_FOUND) }
+            launch { clubReader.findById(clubId) ?: BaseException(ErrorCode.CLUB_NOT_FOUND) }
             // TODO player가 해당 클럽에 가입한 이력이 있는지, 또는 클럽에 블랙리스트로 등록되어있는지 확인하는 로직 추가 필요
             val joinDeferred = async { joinReader.findOneByExtraIds(clubId, playerId) }
 

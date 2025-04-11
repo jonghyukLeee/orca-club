@@ -1,8 +1,7 @@
 package com.orca.club.service
 
 import com.orca.club.domain.Club
-import com.orca.club.domain.Club.Player
-import com.orca.club.domain.Club.Player.Position
+import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.ClubRepository
@@ -40,7 +39,7 @@ class ClubManager(
         ).awaitSingleOrNull() ?: throw BaseException(ErrorCode.CLUB_NOT_FOUND)
     }
 
-    suspend fun addPlayer(clubId: String, playerId: String, name: String, position: Position) {
+    suspend fun addPlayer(clubId: String, playerId: String, name: String, position: Player.Position) {
         val update = Update().apply {
             addToSet(
                 "players", Player(
