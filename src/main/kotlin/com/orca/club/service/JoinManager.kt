@@ -1,8 +1,8 @@
 package com.orca.club.service
 
-import com.orca.club.domain.Club.Player.Position
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.JoinApplicationRepository
@@ -20,7 +20,7 @@ class JoinManager(
     private val repository: JoinApplicationRepository,
     private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) {
-    suspend fun create(clubId: String, playerId: String, position: Position): JoinApplication {
+    suspend fun create(clubId: String, playerId: String, position: Player.Position): JoinApplication {
         return repository.save(
             JoinApplication(
                 clubId = clubId,

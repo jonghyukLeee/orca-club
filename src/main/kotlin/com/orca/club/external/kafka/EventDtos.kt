@@ -1,13 +1,13 @@
 package com.orca.club.external.kafka
 
-import com.orca.club.domain.Club.Player.Position
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.Player
 
 data class JoinAcceptMessage(
     val applicationId: String,
     val clubId: String,
     val playerId: String,
-    val position: Position,
+    val position: Player.Position,
     val status: JoinApplicationStatus,
 )
 

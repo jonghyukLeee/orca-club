@@ -16,26 +16,33 @@ data class Club(
     val mannerPoint: Double = 0.0,
     val blacklist: MutableList<String> = mutableListOf(),
     val status: ClubStatus = ClubStatus.OPEN
-) {
-    data class Player(
-        val id: String,
-        val name: String,
-        val position: Position,
-        val matchCount: Int = 0,
-        val goal: Int = 0,
-        val assist: Int = 0,
-        val momCount: Int = 0
-    ) {
-        enum class Position {
-            FW,
-            MF,
-            DF
-        }
-    }
+)
 
-    data class Review(
-        val id: String,
-        val point: Double,
-        val comment: String
-    )
+data class Player(
+    val id: String,
+    val name: String,
+    val position: Position,
+    val matchCount: Int = 0,
+    val goal: Int = 0,
+    val assist: Int = 0,
+    val momCount: Int = 0,
+    val status: ActiveStatus = ActiveStatus.ACTIVE
+) {
+    enum class Position {
+        FW,
+        MF,
+        DF
+    }
+}
+
+data class Review(
+    val id: String,
+    val point: Double,
+    val comment: String
+)
+
+enum class ActiveStatus {
+    ACTIVE,
+    INACTIVE,
+    WITHDRAWN
 }
