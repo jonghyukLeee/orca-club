@@ -35,7 +35,7 @@ fun Player.toResponse(): PlayerResponse {
 
 fun Review.toResponse(): ReviewResponse {
     return ReviewResponse(
-        id = this.id,
+        id = this.id!!,
         point = this.point,
         comment = this.comment,
     )
@@ -47,7 +47,7 @@ fun JoinApplication.toResponse(): JoinApplicationResponse {
         clubId = this.clubId,
         playerId = this.playerId,
         position = this.position.name,
-        status = this.status,
+        status = this.status.name,
         notification = this.status.notification,
         createdAt = this.getCreateAtAsKST()
     )

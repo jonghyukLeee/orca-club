@@ -35,12 +35,6 @@ data class Player(
     }
 }
 
-data class Review(
-    val id: String,
-    val point: Double,
-    val comment: String
-)
-
 enum class ActiveStatus {
     ACTIVE,
     INACTIVE,
