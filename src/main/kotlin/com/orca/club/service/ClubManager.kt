@@ -5,8 +5,10 @@ import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.ClubRepository
+import com.orca.club.utils.buildQueryById
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -28,7 +30,7 @@ class ClubManager(
         ).awaitSingle()
     }
 
-    suspend fun update(clubId: String, name: String?, introduction: String?): Club {
+    suspend fun update(clubId: ObjectId, name: String?, introduction: String?): Club {
         val update = Update().apply {
             name?.let { set("name", it) }
             introduction?.let { set("introduction", it) }
@@ -39,14 +41,15 @@ class ClubManager(
         ).awaitSingleOrNull() ?: throw BaseException(ErrorCode.CLUB_NOT_FOUND)
     }
 
-    suspend fun addPlayer(clubId: String, playerId: String, name: String, position: Player.Position) {
-        val update = Update().apply {
-            addToSet(
-                "players", Player(
-                    id = playerId, name = name, position = position
-                )
-            )
+    suspend fun delete(clubId: ObjectId) {
+        clubRepository.deleteById(clubId).awaitSingle()
+    }
+
+    suspend fun addPlayer(clubId: ObjectId, playerId: ObjectId, name: String, role: Player.Role? = null) {
+        val player = Player(id = playerId, name = name).apply {
+            role?.let { this.role = it }
         }
+        val update = Update().apply { addToSet("players", player) }
 
         val result = reactiveMongoTemplate.updateFirst(
             buildQueryById(clubId), update, Club::class.java
@@ -56,7 +59,7 @@ class ClubManager(
         if (result.modifiedCount == 0L) throw BaseException(ErrorCode.ALREADY_JOINED)
     }
 
-    suspend fun updatePlayerInfo(playerId: String, name:String?){
+    suspend fun updatePlayerInfo(playerId: ObjectId, name: String?) {
         val query = Query(Criteria.where("players.id").`is`(playerId))
 
         val update = Update().apply {
@@ -70,22 +73,16 @@ class ClubManager(
         if (result.matchedCount == 0L || result.modifiedCount == 0L) throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
     }
 
-    suspend fun deletePlayer(clubId: String, playerId: String){
+    suspend fun deletePlayer(clubId: ObjectId, playerId: ObjectId) {
         val update = Update().apply {
             pull("players", buildQueryById(playerId))
         }
 
         val result = reactiveMongoTemplate.updateFirst(
-            buildQueryById(clubId)
-            , update
-            , Club::class.java
+            buildQueryById(clubId), update, Club::class.java
         ).awaitSingle()
 
         if (result.matchedCount == 0L) throw BaseException(ErrorCode.CLUB_NOT_FOUND)
         if (result.modifiedCount == 0L) throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
-    }
-
-    private suspend fun buildQueryById(id: String): Query {
-        return Query(Criteria.where("_id").`is`(id))
     }
 }

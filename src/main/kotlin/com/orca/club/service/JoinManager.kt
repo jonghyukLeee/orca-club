@@ -8,6 +8,7 @@ import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.JoinApplicationRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -20,17 +21,16 @@ class JoinManager(
     private val repository: JoinApplicationRepository,
     private val reactiveMongoTemplate: ReactiveMongoTemplate
 ) {
-    suspend fun create(clubId: String, playerId: String, position: Player.Position): JoinApplication {
+    suspend fun create(clubId: ObjectId, playerId: ObjectId): JoinApplication {
         return repository.save(
             JoinApplication(
                 clubId = clubId,
-                playerId = playerId,
-                position = position
+                playerId = playerId
             )
         ).awaitSingle()
     }
 
-    suspend fun updateStatus(joinApplicationId: String, status: JoinApplicationStatus): JoinApplication {
+    suspend fun updateStatus(joinApplicationId: ObjectId, status: JoinApplicationStatus): JoinApplication {
         val query = Query(Criteria.where("_id").`is`(joinApplicationId))
 
         val update = Update().apply {

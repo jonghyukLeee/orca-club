@@ -7,7 +7,7 @@ import com.orca.club.api.ReviewResponse
 
 fun Club.toResponse(): ClubResponse {
     return ClubResponse(
-        id = this.id!!,
+        id = this.id.toString(),
         name = this.name,
         introduction = this.introduction,
         win = this.win,
@@ -22,9 +22,9 @@ fun Club.toResponse(): ClubResponse {
 
 fun Player.toResponse(): PlayerResponse {
     return PlayerResponse(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
-        position = this.position.name,
+        position = this.position?.name,
         matchCount = this.matchCount,
         goal = this.goal,
         assist = this.assist,
@@ -35,7 +35,7 @@ fun Player.toResponse(): PlayerResponse {
 
 fun Review.toResponse(): ReviewResponse {
     return ReviewResponse(
-        id = this.id!!,
+        id = this.id.toString(),
         point = this.point,
         comment = this.comment,
     )
@@ -43,10 +43,9 @@ fun Review.toResponse(): ReviewResponse {
 
 fun JoinApplication.toResponse(): JoinApplicationResponse {
     return JoinApplicationResponse(
-        requestId = this.id!!,
-        clubId = this.clubId,
-        playerId = this.playerId,
-        position = this.position.name,
+        requestId = this.id.toString(),
+        clubId = this.clubId.toString(),
+        playerId = this.playerId.toString(),
         status = this.status.name,
         notification = this.status.notification,
         createdAt = this.getCreateAtAsKST()

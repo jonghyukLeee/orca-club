@@ -1,33 +1,44 @@
 package com.orca.club.domain
 
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "clubs")
 data class Club(
     @Id
-    val id: String? = null,
-    val name: String,
-    val introduction: String,
-    val win: Int = 0,
-    val lose: Int = 0,
+    val id: ObjectId? = null,
+    var name: String,
+    var introduction: String,
+    var win: Int = 0,
+    var lose: Int = 0,
     val players: MutableList<Player> = mutableListOf(),
     val reviews: MutableList<Review> = mutableListOf(),
-    val mannerPoint: Double = 0.0,
+    var mannerPoint: Double = 0.0,
     val blacklist: MutableList<String> = mutableListOf(),
-    val status: ClubStatus = ClubStatus.OPEN
+    var status: ClubStatus = ClubStatus.OPEN
 )
 
 data class Player(
-    val id: String,
-    val name: String,
-    val position: Position,
-    val matchCount: Int = 0,
-    val goal: Int = 0,
-    val assist: Int = 0,
-    val momCount: Int = 0,
-    val status: ActiveStatus = ActiveStatus.ACTIVE
+    val id: ObjectId,
+    var name: String,
+    var role: Role = Role.PLAYER,
+    var position: Position? = null,
+    var matchCount: Int = 0,
+    var goal: Int = 0,
+    var assist: Int = 0,
+    var momCount: Int = 0,
+    var status: ActiveStatus = ActiveStatus.ACTIVE
 ) {
+    enum class Role(val value: String) {
+        OWNER("구단주"),
+        DIRECTOR("감독"),
+        MANAGER("클럽 관리자"),
+
+        COACH("코치"),
+        PLAYER("선수")
+    }
+
     enum class Position {
         FW,
         MF,
