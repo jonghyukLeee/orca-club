@@ -1,15 +1,26 @@
 package com.orca.club.api
 
-import com.orca.club.domain.*
+import com.orca.club.service.CreateClubCommand
 import io.swagger.v3.oas.annotations.media.Schema
+import org.bson.types.ObjectId
 
 @Schema(description = "클럽 생성 RequestDTO")
-data class GenerateRequest(
+data class CreateClubRequest(
+    @field:Schema(description = "Player ID (구단주)")
+    val playerId: String,
     @field:Schema(description = "클럽 이름")
     val name: String,
     @field:Schema(description = "클럽 소개")
     val introduction: String = ""
-)
+) {
+    fun toCommand(): CreateClubCommand {
+        return CreateClubCommand(
+            playerId = ObjectId(this.playerId),
+            name = name,
+            introduction = introduction,
+        )
+    }
+}
 
 @Schema(description = "클럽 수정 RequestDTO")
 data class UpdateRequest(
@@ -52,7 +63,7 @@ data class PlayerResponse(
     @field:Schema(description = "선수 이름")
     val name: String,
     @field:Schema(description = "포지션 (FW / MF / DF)")
-    val position: String,
+    val position: String? = null,
     @field:Schema(description = "경기 참여 횟수")
     val matchCount: Int,
     @field:Schema(description = "득점")
@@ -80,9 +91,7 @@ data class JoinRequest(
     @field:Schema(description = "Club ID")
     val clubId: String,
     @field:Schema(description = "Player ID")
-    val playerId: String,
-    @field:Schema(description = "포지션 (FW / MF / DF)")
-    val position: Player.Position
+    val playerId: String
 )
 
 @Schema(description = "클럽 참가 신청 ResponseDTO")
@@ -93,8 +102,6 @@ data class JoinApplicationResponse(
     val clubId: String,
     @field:Schema(description = "Player ID")
     val playerId: String,
-    @field:Schema(description = "포지션 (FW / MF / DF)")
-    val position: String,
     @field:Schema(description = "신청 상태 (PENDING / ACCEPTED / REJECTED)")
     val status: String,
     @field:Schema(description = "신청 상태 메시지")

@@ -14,6 +14,9 @@ enum class ErrorCode(val status: HttpStatus? = HttpStatus.NOT_FOUND, val message
     ALREADY_JOINED(status = HttpStatus.BAD_REQUEST, message = "Already joined player."),
     PLAYER_NOT_FOUND(status = HttpStatus.BAD_REQUEST, message = "Player not found."),
 
-    DUPLICATE_NAME(status = HttpStatus.BAD_REQUEST, message = "Club name is duplicated.")
+    DUPLICATE_NAME(status = HttpStatus.BAD_REQUEST, message = "Club name is duplicated."),
 
+    // external
+    REDIS_KEY_NOT_FOUND(message = "Key does not exist in Redis"),
+    JSON_KEY_NOT_FOUND(message = "Invalid json key"),
 }

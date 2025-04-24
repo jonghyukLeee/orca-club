@@ -6,9 +6,12 @@ import com.orca.club.service.ClubService
 import com.orca.club.service.JoinService
 import com.orca.club.utils.baseResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Club", description = "Club APIs")
 @RequestMapping
 @RestController
 class ClubController(
@@ -20,8 +23,8 @@ class ClubController(
         description = "클럽 생성 API"
     )
     @PostMapping
-    suspend fun generate(@RequestBody request: GenerateRequest): ResponseEntity<ClubResponse> {
-        return baseResponse(body = clubService.generate(request.name, request.introduction).toResponse())
+    suspend fun create(@RequestBody request: CreateClubRequest): ResponseEntity<ClubResponse> {
+        return baseResponse(body = clubService.create(request.toCommand()).toResponse())
     }
 
     @Operation(
@@ -30,7 +33,7 @@ class ClubController(
     )
     @GetMapping("/{clubId}")
     suspend fun get(@PathVariable clubId: String): ResponseEntity<ClubResponse> {
-        return baseResponse(body = clubService.get(clubId).toResponse())
+        return baseResponse(body = clubService.get(ObjectId(clubId)).toResponse())
     }
 
     @Operation(
@@ -40,7 +43,7 @@ class ClubController(
     @PatchMapping
     suspend fun update(@RequestBody request: UpdateRequest): ResponseEntity<ClubResponse> {
         return baseResponse(
-            body = clubService.update(request.id, request.name, request.introduction).toResponse()
+            body = clubService.update(ObjectId(request.id), request.name, request.introduction).toResponse()
         )
     }
 
@@ -53,7 +56,7 @@ class ClubController(
         @RequestBody request: JoinRequest
     ): ResponseEntity<JoinApplicationResponse> {
         return baseResponse(
-            body = joinService.generate(request.clubId, request.playerId, request.position).toResponse()
+            body = joinService.create(ObjectId(request.clubId), ObjectId(request.playerId)).toResponse()
         )
     }
 
@@ -67,7 +70,7 @@ class ClubController(
         @RequestParam status: JoinApplicationStatus
     ): ResponseEntity<List<JoinApplicationResponse>> {
         return baseResponse(
-            body = joinService.getClubApplications(clubId, status).map { it.toResponse() }
+            body = joinService.getClubApplications(ObjectId(clubId), status).map { it.toResponse() }
         )
     }
 
@@ -81,7 +84,7 @@ class ClubController(
         @RequestParam status: JoinApplicationStatus
     ): ResponseEntity<List<JoinApplicationResponse>> {
         return baseResponse(
-            body = joinService.getPlayerApplications(playerId, status).map { it.toResponse() }
+            body = joinService.getPlayerApplications(ObjectId(playerId), status).map { it.toResponse() }
         )
     }
 
@@ -93,7 +96,7 @@ class ClubController(
     suspend fun joinAccept(
         @PathVariable id: String
     ): ResponseEntity<JoinApplicationResponse> {
-        return baseResponse(body = joinService.accept(id).toResponse())
+        return baseResponse(body = joinService.accept(ObjectId(id)).toResponse())
     }
 
     @Operation(
@@ -103,8 +106,8 @@ class ClubController(
     @PostMapping("/join-application/{id}/reject")
     suspend fun joinReject(
         @PathVariable id: String
-    ): ResponseEntity<String> {
-        return baseResponse(body = joinService.reject(id))
+    ): ResponseEntity<Void> {
+        return ResponseEntity.noContent().build()
     }
 
     @Operation(
@@ -116,6 +119,6 @@ class ClubController(
         @PathVariable clubId: String,
         @PathVariable playerId: String
     ): ResponseEntity<PlayerResponse> {
-        return baseResponse(body = clubService.getPlayer(clubId, playerId).toResponse())
+        return baseResponse(body = clubService.getPlayer(ObjectId(clubId), ObjectId(playerId)).toResponse())
     }
 }

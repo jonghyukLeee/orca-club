@@ -1,5 +1,6 @@
 package com.orca.club.domain
 
+import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
@@ -9,10 +10,9 @@ import java.time.format.DateTimeFormatter
 @Document(collection = "join_applications")
 data class JoinApplication(
     @Id
-    val id: String? = null,
-    val clubId: String,
-    val playerId: String,
-    val position: Player.Position,
+    val id: ObjectId? = null,
+    val clubId: ObjectId,
+    val playerId: ObjectId,
     val status: JoinApplicationStatus = JoinApplicationStatus.PENDING,
     val createdAt: Instant = Instant.now()
 ) {
