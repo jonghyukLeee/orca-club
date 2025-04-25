@@ -6,7 +6,6 @@ import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.external.kafka.EventTopics
 import com.orca.club.external.kafka.JoinAcceptMessage
-import com.orca.club.external.kafka.publisher.CompensationEventPublisher
 import com.orca.club.external.kafka.publisher.EventPublisher
 import com.orca.club.external.player.PlayerService
 import com.orca.club.external.redis.RedisService
@@ -27,7 +26,6 @@ class JoinService(
     private val clubManager: ClubManager,
     private val playerService: PlayerService,
     private val eventPublisher: EventPublisher,
-    private val compensationEventPublisher: CompensationEventPublisher,
     private val redisService: RedisService
 ) {
     suspend fun create(clubId: ObjectId, playerId: ObjectId): JoinApplication {
@@ -88,7 +86,15 @@ class JoinService(
                     JoinApplicationStatus.ACCEPTED
                 )
             } catch (e: Exception) {
-                launch { compensationEventPublisher.joinAcceptFailed(joinApplication) }
+                launch {
+                    eventPublisher.send(EventTopics.JOIN_ACCEPT_FAILED,
+                        JoinAcceptMessage(
+                            joinApplicationId = joinApplicationId.toString(),
+                            clubId = joinApplication.clubId.toString(),
+                            playerId = joinApplication.playerId.toString()
+                        )
+                    ).toJsonString()
+                }
                 launch { clubManager.deletePlayer(joinApplication.clubId, player.playerId) }
                 throw BaseException(ErrorCode.JOIN_ACCEPT_FAILED)
             }

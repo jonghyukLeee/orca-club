@@ -15,7 +15,11 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun undefinedException(e: Exception): ResponseEntity<ErrorResponse> {
-        logger.error("Undefined Exception.\n$e")
+        logger.error(
+            e.message,
+            e.cause,
+            e
+        )
         return baseResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR,
             body = ErrorResponse(BaseException(ErrorCode.UNDEFINED_EXCEPTION))

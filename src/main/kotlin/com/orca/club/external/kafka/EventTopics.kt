@@ -3,6 +3,7 @@ package com.orca.club.external.kafka
 object EventTopics {
     // Player
     const val PLAYER_UPDATED = "player-updated"
+    const val PLAYER_UPDATE_FAILED = "player-update-failed"
 
     // Club
     const val CLUB_CREATED = "club-created"
