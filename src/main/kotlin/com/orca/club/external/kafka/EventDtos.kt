@@ -6,14 +6,7 @@ data class JoinAcceptMessage(
     val playerId: String,
 )
 
-data class JoinAcceptFailedMessage(
-    val joinApplicationId: String,
-    val clubId: String,
-    val playerId: String,
-    val status: String
-)
-
-data class PlayerUpdateMessage(
+data class PlayerMessage(
     val id: String,
     val name: String,
     val birth: String,
