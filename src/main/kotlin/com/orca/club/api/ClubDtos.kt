@@ -62,6 +62,8 @@ data class PlayerResponse(
     val id: String,
     @field:Schema(description = "선수 이름")
     val name: String,
+    @field:Schema(description = "직책")
+    val role: String,
     @field:Schema(description = "포지션 (FW / MF / DF)")
     val position: String? = null,
     @field:Schema(description = "경기 참여 횟수")
@@ -97,7 +99,7 @@ data class JoinRequest(
 @Schema(description = "클럽 참가 신청 ResponseDTO")
 data class JoinApplicationResponse(
     @field:Schema(description = "JoinApplication ID")
-    val requestId: String,
+    val joinApplicationId: String,
     @field:Schema(description = "Club ID")
     val clubId: String,
     @field:Schema(description = "Player ID")

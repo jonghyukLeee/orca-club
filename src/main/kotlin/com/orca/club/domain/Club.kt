@@ -15,14 +15,18 @@ data class Club(
     val players: MutableList<Player> = mutableListOf(),
     val reviews: MutableList<Review> = mutableListOf(),
     var mannerPoint: Double = 0.0,
-    val blacklist: MutableList<String> = mutableListOf(),
+    val blacklist: MutableList<ObjectId> = mutableListOf(),
     var status: ClubStatus = ClubStatus.OPEN
-)
+) {
+    fun isBlacklistedPlayer(playerId: ObjectId): Boolean {
+        return this.blacklist.firstOrNull { it == playerId } != null
+    }
+}
 
 data class Player(
     val id: ObjectId,
     var name: String,
-    var role: Role = Role.PLAYER,
+    var role: Role,
     var position: Position? = null,
     var matchCount: Int = 0,
     var goal: Int = 0,

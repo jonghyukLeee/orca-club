@@ -2,7 +2,6 @@ package com.orca.club.service
 
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
-import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.repository.JoinApplicationRepository
@@ -40,9 +39,5 @@ class JoinManager(
         return reactiveMongoTemplate.findAndModify(
             query, update, FindAndModifyOptions().returnNew(true), JoinApplication::class.java
         ).awaitSingleOrNull() ?: throw BaseException(ErrorCode.JOIN_APPLICATION_NOT_FOUND)
-    }
-
-    suspend fun delete(entity: JoinApplication) {
-        repository.delete(entity).awaitSingle()
     }
 }

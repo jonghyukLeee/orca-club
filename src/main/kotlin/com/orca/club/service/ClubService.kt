@@ -1,13 +1,15 @@
 package com.orca.club.service
 
-import com.orca.club.external.redis.RedisService
 import com.orca.club.domain.Club
+import com.orca.club.domain.ClubStatus
 import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
 import com.orca.club.external.kafka.ClubCreatedMessage
 import com.orca.club.external.kafka.EventTopics
 import com.orca.club.external.kafka.publisher.EventPublisher
+import com.orca.club.external.player.PlayerService
+import com.orca.club.external.redis.RedisService
 import com.orca.club.utils.generateTransactionId
 import com.orca.club.utils.toJsonString
 import kotlinx.coroutines.async
@@ -22,13 +24,20 @@ class ClubService(
     private val clubManager: ClubManager,
     private val clubReader: ClubReader,
     private val eventPublisher: EventPublisher,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    private val playerService: PlayerService
 ) {
     suspend fun create(command: CreateClubCommand): Club {
         return coroutineScope {
             val txId = generateTransactionId()
+
             validateIsDuplicatedClubName(command.name)
-            val club = async { clubManager.create(command.name, command.introduction) }.await()
+
+            val playerDeferred = async { playerService.getPlayer(command.playerId) }
+            val clubDeferred = async { clubManager.create(command.name, command.introduction) }
+
+            val player = playerDeferred.await()
+            val club = clubDeferred.await()
 
             saveTxMessage(
                 txId = txId,
@@ -37,10 +46,10 @@ class ClubService(
 
             try {
                 launch {
-                    clubManager.addPlayer(
+                    joinPlayer(
                         clubId = club.id!!,
                         playerId = command.playerId,
-                        name = command.name,
+                        name = player.name,
                         role = Player.Role.OWNER
                     )
                 }
@@ -70,7 +79,21 @@ class ClubService(
         )
     }
 
+    suspend fun releasePlayer(clubId: ObjectId, playerId: ObjectId) {
+        clubManager.deletePlayer(clubId, playerId)
+    }
+
     suspend fun getPlayer(clubId: ObjectId, playerId: ObjectId): Player {
         return clubReader.findPlayerById(clubId, playerId) ?: throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
+    }
+
+    suspend fun joinPlayer(clubId: ObjectId, playerId: ObjectId, name: String, role: Player.Role = Player.Role.PLAYER) {
+        clubManager.addPlayer(clubId, Player(id = playerId, name = name, role = role))
+    }
+
+    suspend fun switchClubStatus(clubId: ObjectId): Club {
+        val club = get(clubId)
+        val newStatus = if (ClubStatus.OPEN == club.status) ClubStatus.CLOSE else ClubStatus.OPEN
+        return clubManager.updateStatus(clubId, newStatus)
     }
 }

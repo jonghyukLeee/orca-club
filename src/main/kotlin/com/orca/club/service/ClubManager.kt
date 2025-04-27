@@ -1,6 +1,7 @@
 package com.orca.club.service
 
 import com.orca.club.domain.Club
+import com.orca.club.domain.ClubStatus
 import com.orca.club.domain.Player
 import com.orca.club.exception.BaseException
 import com.orca.club.exception.ErrorCode
@@ -45,10 +46,7 @@ class ClubManager(
         clubRepository.deleteById(clubId).awaitSingle()
     }
 
-    suspend fun addPlayer(clubId: ObjectId, playerId: ObjectId, name: String, role: Player.Role? = null) {
-        val player = Player(id = playerId, name = name).apply {
-            role?.let { this.role = it }
-        }
+    suspend fun addPlayer(clubId: ObjectId, player: Player) {
         val update = Update().apply { addToSet("players", player) }
 
         val result = reactiveMongoTemplate.updateFirst(
@@ -84,5 +82,21 @@ class ClubManager(
 
         if (result.matchedCount == 0L) throw BaseException(ErrorCode.CLUB_NOT_FOUND)
         if (result.modifiedCount == 0L) throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
+    }
+
+    suspend fun updateStatus(clubId: ObjectId, status: ClubStatus): Club {
+        val update = Update().apply {
+            set("status", status)
+        }
+
+        val result = reactiveMongoTemplate.updateFirst(
+            buildQueryById(clubId),
+            update,
+            Club::class.java
+        ).awaitSingle()
+
+        if (result.matchedCount == 0L) throw BaseException(ErrorCode.CLUB_NOT_FOUND)
+
+        return reactiveMongoTemplate.findById(clubId, Club::class.java).awaitSingle()
     }
 }

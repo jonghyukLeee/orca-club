@@ -48,8 +48,8 @@ class ClubController(
     }
 
     @Operation(
-        summary = "클럽 참가 신청",
-        description = "클럽 참가 신청 API"
+        summary = "클럽 가입 신청",
+        description = "클럽 가입 신청 API"
     )
     @PostMapping("/join-application")
     suspend fun joinRequest(
@@ -61,8 +61,8 @@ class ClubController(
     }
 
     @Operation(
-        summary = "클럽 참가 신청 목록 조회 by Club ID",
-        description = "Club ID로 요청된 참가 신청 목록 조회 API"
+        summary = "클럽 가입 신청 목록 조회 by Club ID",
+        description = "Club ID로 요청된 가입 신청 목록 조회 API"
     )
     @GetMapping("/{clubId}/join-application")
     suspend fun getClubApplications(
@@ -75,8 +75,8 @@ class ClubController(
     }
 
     @Operation(
-        summary = "클럽 참가 신청 목록 조회 by Player ID",
-        description = "Player ID가 요청한 클럽 참가 신청 목록 조회 API "
+        summary = "클럽 가입 신청 목록 조회 by Player ID",
+        description = "Player ID가 요청한 클럽 가입 신청 목록 조회 API "
     )
     @GetMapping("/join-application")
     suspend fun getPlayerApplications(
@@ -89,8 +89,8 @@ class ClubController(
     }
 
     @Operation(
-        summary = "참가 신청 수락",
-        description = "클럽 참가 신청 수락 API"
+        summary = "가입 신청 수락",
+        description = "클럽 가입 신청 수락 API"
     )
     @PostMapping("/join-application/{id}/accept")
     suspend fun joinAccept(
@@ -100,14 +100,16 @@ class ClubController(
     }
 
     @Operation(
-        summary = "참가 신청 거절",
-        description = "클럽 참가 신청 거절 API"
+        summary = "가입 신청 거절",
+        description = "클럽 가입 신청 거절 API"
     )
     @PostMapping("/join-application/{id}/reject")
     suspend fun joinReject(
         @PathVariable id: String
-    ): ResponseEntity<Void> {
-        return ResponseEntity.noContent().build()
+    ): ResponseEntity<JoinApplicationResponse> {
+        return baseResponse(
+            body = joinService.reject(ObjectId(id)) .toResponse()
+        )
     }
 
     @Operation(
@@ -120,5 +122,18 @@ class ClubController(
         @PathVariable playerId: String
     ): ResponseEntity<PlayerResponse> {
         return baseResponse(body = clubService.getPlayer(ObjectId(clubId), ObjectId(playerId)).toResponse())
+    }
+
+    @Operation(
+        summary = "클럽 상태 변경",
+        description = "클럽 가입 신청 개방 여부를 변경 (OPEN / CLOSE)"
+    )
+    @PatchMapping("/{clubId}/status")
+    suspend fun switchStatus(
+        @PathVariable clubId: String
+    ): ResponseEntity<ClubResponse> {
+        return baseResponse(
+            body = clubService.switchClubStatus(ObjectId(clubId)).toResponse()
+        )
     }
 }
