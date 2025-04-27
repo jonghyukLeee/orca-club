@@ -15,7 +15,7 @@ fun Club.toResponse(): ClubResponse {
         players = this.players.map { it.toResponse() },
         reviews = this.reviews.map { it.toResponse() },
         mannerPoint = this.mannerPoint,
-        blacklist = this.blacklist.toList(),
+        blacklist = this.blacklist.map { it.toString() }.toList(),
         status = this.status.name,
     )
 }
@@ -24,6 +24,7 @@ fun Player.toResponse(): PlayerResponse {
     return PlayerResponse(
         id = this.id.toString(),
         name = this.name,
+        role = this.role.name,
         position = this.position?.name,
         matchCount = this.matchCount,
         goal = this.goal,
@@ -43,7 +44,7 @@ fun Review.toResponse(): ReviewResponse {
 
 fun JoinApplication.toResponse(): JoinApplicationResponse {
     return JoinApplicationResponse(
-        requestId = this.id.toString(),
+        joinApplicationId = this.id.toString(),
         clubId = this.clubId.toString(),
         playerId = this.playerId.toString(),
         status = this.status.name,

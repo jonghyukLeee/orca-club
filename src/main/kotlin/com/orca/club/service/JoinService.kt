@@ -1,5 +1,7 @@
 package com.orca.club.service
 
+import com.orca.club.domain.Club
+import com.orca.club.domain.ClubStatus
 import com.orca.club.domain.JoinApplication
 import com.orca.club.domain.JoinApplicationStatus
 import com.orca.club.exception.BaseException
@@ -22,25 +24,36 @@ import java.time.Duration
 class JoinService(
     private val joinManager: JoinManager,
     private val joinReader: JoinReader,
-    private val clubReader: ClubReader,
-    private val clubManager: ClubManager,
+    private val clubService: ClubService,
     private val playerService: PlayerService,
     private val eventPublisher: EventPublisher,
     private val redisService: RedisService
 ) {
     suspend fun create(clubId: ObjectId, playerId: ObjectId): JoinApplication {
-        return coroutineScope {
-            launch { clubReader.findById(clubId) ?: BaseException(ErrorCode.CLUB_NOT_FOUND) }
-            // TODO player가 해당 클럽에 가입한 이력이 있는지, 또는 클럽에 블랙리스트로 등록되어있는지 확인하는 로직 추가 필요
-            val joinDeferred = async { joinReader.findOneByExtraIds(clubId, playerId) }
+        fun validateCreatable(club: Club) {
+            if (club.isBlacklistedPlayer(playerId)) throw BaseException(ErrorCode.BLACKLISTED_PLAYER)
+            if (club.status == ClubStatus.CLOSE) throw BaseException(ErrorCode.APPLICATION_CLOSED)
+        }
 
-            joinDeferred.await()?.let {
+        fun validateExistingApplication(joinApplication: JoinApplication?) {
+            joinApplication?.let {
                 if (it.status == JoinApplicationStatus.PENDING) {
                     throw BaseException(ErrorCode.JOIN_APPLICATION_DUPLICATED)
                 } else if (it.status == JoinApplicationStatus.ACCEPTED) {
                     throw BaseException(ErrorCode.ALREADY_ACCEPTED)
                 }
             }
+        }
+
+        return coroutineScope {
+            val clubDeferred = async { clubService.get(clubId) }
+            val joinApplicationDeferred = async { joinReader.findOneByExtraIds(clubId, playerId) }
+
+            val club = clubDeferred.await()
+            val joinApplication = joinApplicationDeferred.await()
+
+            validateCreatable(club)
+            validateExistingApplication(joinApplication)
 
             joinManager.create(clubId, playerId)
         }
@@ -63,9 +76,9 @@ class JoinService(
         return coroutineScope {
             try {
                 launch {
-                    clubManager.addPlayer(
+                    clubService.joinPlayer(
                         clubId = joinApplication.clubId,
-                        playerId = player.playerId,
+                        playerId = ObjectId(player.id),
                         name = player.name
                     )
                 }
@@ -75,7 +88,7 @@ class JoinService(
                     JoinAcceptMessage(
                         joinApplicationId = joinApplication.id.toString(),
                         clubId = joinApplication.clubId.toString(),
-                        playerId = player.playerId.toString()
+                        playerId = player.id
                     ).toJsonString()
                 )
 
@@ -87,7 +100,8 @@ class JoinService(
                 )
             } catch (e: Exception) {
                 launch {
-                    eventPublisher.send(EventTopics.JOIN_ACCEPT_FAILED,
+                    eventPublisher.send(
+                        EventTopics.JOIN_ACCEPT_FAILED,
                         JoinAcceptMessage(
                             joinApplicationId = joinApplicationId.toString(),
                             clubId = joinApplication.clubId.toString(),
@@ -95,7 +109,7 @@ class JoinService(
                         )
                     ).toJsonString()
                 }
-                launch { clubManager.deletePlayer(joinApplication.clubId, player.playerId) }
+                launch { clubService.releasePlayer(joinApplication.clubId, ObjectId(player.id)) }
                 throw BaseException(ErrorCode.JOIN_ACCEPT_FAILED)
             }
         }
@@ -105,10 +119,8 @@ class JoinService(
         redisService.set(txId, value, Duration.ofDays(1L))
     }
 
-    suspend fun reject(joinApplicationId: ObjectId) {
-        val joinApplication =
-            joinReader.findOneById(joinApplicationId) ?: throw BaseException(ErrorCode.JOIN_APPLICATION_NOT_FOUND)
-
-        joinManager.delete(joinApplication)
+    suspend fun reject(joinApplicationId: ObjectId): JoinApplication {
+        joinReader.findOneById(joinApplicationId) ?: throw BaseException(ErrorCode.JOIN_APPLICATION_NOT_FOUND)
+        return joinManager.updateStatus(joinApplicationId, JoinApplicationStatus.REJECTED)
     }
 }
