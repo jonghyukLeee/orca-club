@@ -1,6 +1,7 @@
 package com.orca.club.api
 
 import com.orca.club.domain.JoinApplicationStatus
+import com.orca.club.domain.Player
 import com.orca.club.domain.toResponse
 import com.orca.club.service.ClubService
 import com.orca.club.service.JoinService
@@ -134,6 +135,21 @@ class ClubController(
     ): ResponseEntity<ClubResponse> {
         return baseResponse(
             body = clubService.switchClubStatus(ObjectId(clubId)).toResponse()
+        )
+    }
+
+    @Operation(
+        summary = "포지션 변경",
+        description = "선수의 포지션을 변경 (FW / MF / DF)"
+    )
+    @PatchMapping("/{clubId}/players/{playerId}")
+    suspend fun updatePosition(
+        @PathVariable clubId: String,
+        @PathVariable playerId: String,
+        @RequestParam position: Player.Position
+    ): ResponseEntity<PlayerResponse> {
+        return baseResponse(
+            body = clubService.updatePosition(ObjectId(clubId), ObjectId(playerId), position).toResponse()
         )
     }
 }

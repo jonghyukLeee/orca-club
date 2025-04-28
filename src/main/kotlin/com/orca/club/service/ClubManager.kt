@@ -99,4 +99,18 @@ class ClubManager(
 
         return reactiveMongoTemplate.findById(clubId, Club::class.java).awaitSingle()
     }
+
+    suspend fun updatePosition(clubId: ObjectId, playerId: ObjectId, position: Player.Position): Player {
+        val query = Query(Criteria.where("_id").`is`(clubId).and("players.id").`is`(playerId))
+        val update = Update().set("players.$.position", position.name)
+
+        val updatedClub = reactiveMongoTemplate.findAndModify(
+            query,
+            update,
+            FindAndModifyOptions.options().returnNew(true),
+            Club::class.java
+        ).awaitSingleOrNull() ?: throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
+
+        return updatedClub.players.find { it.id == playerId }!!
+    }
 }

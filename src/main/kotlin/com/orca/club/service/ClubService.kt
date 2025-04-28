@@ -41,7 +41,10 @@ class ClubService(
 
             saveTxMessage(
                 txId = txId,
-                value = ClubCreatedMessage(clubId = club.id.toString(), playerId = command.playerId.toString()).toJsonString()
+                value = ClubCreatedMessage(
+                    clubId = club.id.toString(),
+                    playerId = command.playerId.toString()
+                ).toJsonString()
             )
 
             try {
@@ -84,7 +87,12 @@ class ClubService(
     }
 
     suspend fun getPlayer(clubId: ObjectId, playerId: ObjectId): Player {
+        validateIsExistClub(clubId)
         return clubReader.findPlayerById(clubId, playerId) ?: throw BaseException(ErrorCode.PLAYER_NOT_FOUND)
+    }
+
+    private suspend fun validateIsExistClub(clubId: ObjectId) {
+        get(clubId)
     }
 
     suspend fun joinPlayer(clubId: ObjectId, playerId: ObjectId, name: String, role: Player.Role = Player.Role.PLAYER) {
@@ -95,5 +103,10 @@ class ClubService(
         val club = get(clubId)
         val newStatus = if (ClubStatus.OPEN == club.status) ClubStatus.CLOSE else ClubStatus.OPEN
         return clubManager.updateStatus(clubId, newStatus)
+    }
+
+    suspend fun updatePosition(clubId: ObjectId, playerId: ObjectId, position: Player.Position): Player {
+        validateIsExistClub(clubId)
+        return clubManager.updatePosition(clubId, playerId, position)
     }
 }
