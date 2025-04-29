@@ -109,7 +109,7 @@ class ClubController(
         @PathVariable id: String
     ): ResponseEntity<JoinApplicationResponse> {
         return baseResponse(
-            body = joinService.reject(ObjectId(id)) .toResponse()
+            body = joinService.reject(ObjectId(id)).toResponse()
         )
     }
 
@@ -150,6 +150,35 @@ class ClubController(
     ): ResponseEntity<PlayerResponse> {
         return baseResponse(
             body = clubService.updatePosition(ObjectId(clubId), ObjectId(playerId), position).toResponse()
+        )
+    }
+
+    @Operation(
+        summary = "블랙리스트 등록",
+        description = "Player를 블랙리스트에 등록합니다."
+    )
+    @PutMapping("/{clubId}/blacklist/{playerId}")
+    suspend fun addToBlacklist(
+        @PathVariable clubId: String,
+        @PathVariable playerId: String
+    ): ResponseEntity<List<String>> {
+        return baseResponse(
+            body = clubService.addToBlacklist(ObjectId(clubId), ObjectId(playerId)).map { it.toString() }
+        )
+    }
+
+
+    @Operation(
+        summary = "블랙리스트 해제",
+        description = "Player를 블랙리스트에서 제거합니다."
+    )
+    @DeleteMapping("/{clubId}/blacklist/{playerId}")
+    suspend fun removeFromBlacklist(
+        @PathVariable clubId: String,
+        @PathVariable playerId: String
+    ): ResponseEntity<List<String>> {
+        return baseResponse(
+            body = clubService.removeFromBlacklist(ObjectId(clubId), ObjectId(playerId)).map { it.toString() }
         )
     }
 }

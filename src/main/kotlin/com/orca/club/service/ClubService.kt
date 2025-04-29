@@ -109,4 +109,28 @@ class ClubService(
         validateIsExistClub(clubId)
         return clubManager.updatePosition(clubId, playerId, position)
     }
+
+    suspend fun addToBlacklist(clubId: ObjectId, playerId: ObjectId): List<ObjectId> {
+        return coroutineScope {
+            val playerDeferred = async { playerService.getPlayer(playerId) }
+            val clubDeferred = async { get(clubId) }
+
+            playerDeferred.await()
+            val club = clubDeferred.await()
+
+            if (club.isBlacklistedPlayer(playerId)) throw BaseException(ErrorCode.ALREADY_BLACKLISTED)
+            clubManager.addToBlacklist(clubId, playerId)
+        }
+    }
+
+    suspend fun removeFromBlacklist(clubId: ObjectId, playerId: ObjectId): List<ObjectId> {
+        return coroutineScope {
+            val clubDeferred = async { get(clubId) }
+
+            val club = clubDeferred.await()
+            if (!club.isBlacklistedPlayer(playerId)) throw BaseException(ErrorCode.PLAYER_NOT_FOUND_IN_BLACKLIST)
+
+            clubManager.removeFromBlacklist(clubId, playerId)
+        }
+    }
 }

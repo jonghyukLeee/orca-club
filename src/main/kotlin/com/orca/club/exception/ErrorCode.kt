@@ -14,6 +14,8 @@ enum class ErrorCode(val status: HttpStatus? = HttpStatus.NOT_FOUND, val message
     ALREADY_JOINED(status = HttpStatus.BAD_REQUEST, message = "Already joined player."),
     PLAYER_NOT_FOUND(status = HttpStatus.BAD_REQUEST, message = "Player not found."),
     BLACKLISTED_PLAYER(status = HttpStatus.CONFLICT, message = "Is blacklisted player."),
+    PLAYER_NOT_FOUND_IN_BLACKLIST(status = HttpStatus.NOT_FOUND, message = "Player is not blacklisted."),
+    ALREADY_BLACKLISTED(status = HttpStatus.CONFLICT, message = "Already blacklisted player."),
     APPLICATION_CLOSED(status = HttpStatus.CONFLICT, message = "Club is currently closed."),
     DUPLICATE_NAME(status = HttpStatus.BAD_REQUEST, message = "Club name is duplicated."),
 
