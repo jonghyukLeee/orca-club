@@ -113,4 +113,34 @@ class ClubManager(
 
         return updatedClub.players.find { it.id == playerId }!!
     }
+
+    suspend fun addToBlacklist(clubId: ObjectId, playerId: ObjectId): List<ObjectId> {
+        val update = Update().apply {
+            addToSet("blacklist", playerId)
+        }
+
+        val updated = reactiveMongoTemplate.findAndModify(
+            buildQueryById(clubId),
+            update,
+            FindAndModifyOptions().returnNew(true),
+            Club::class.java
+        ).awaitSingle()
+
+        return updated.blacklist.toList()
+    }
+
+    suspend fun removeFromBlacklist(clubId: ObjectId, playerId: ObjectId): List<ObjectId> {
+        val update = Update().apply {
+            pull("blacklist", playerId)
+        }
+
+        val updated = reactiveMongoTemplate.findAndModify(
+            buildQueryById(clubId),
+            update,
+            FindAndModifyOptions().returnNew(true),
+            Club::class.java
+        ).awaitSingle()
+
+        return updated.blacklist.toList()
+    }
 }
